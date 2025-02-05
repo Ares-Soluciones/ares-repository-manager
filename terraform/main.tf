@@ -39,7 +39,7 @@ locals {
         project_name = project_name
       })
     }
-  ])
+  ]...)
 
   # Configuraciones predeterminadas para todos los repositorios
   default_branch_protection = {
