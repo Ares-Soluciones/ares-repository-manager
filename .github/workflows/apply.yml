@@ -39,16 +39,16 @@ jobs:
           cd terraform
           terraform init
         env:
-          TF_VAR_github_token: ${{ secrets.GH_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          TF_VAR_github_token: ${{ secrets.ORG_GH_TKN }}
+          GITHUB_TOKEN: ${{ secrets.ORG_GH_TKN }}
           
       - name: Terraform Plan
         run: |
           cd terraform
           terraform plan
         env:
-          TF_VAR_github_token: ${{ secrets.GH_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          TF_VAR_github_token: ${{ secrets.ORG_GH_TKN }}
+          GITHUB_TOKEN: ${{ secrets.ORG_GH_TKN }}
 
   apply:
     needs: plan
@@ -65,13 +65,13 @@ jobs:
           cd terraform
           terraform init
         env:
-          TF_VAR_github_token: ${{ secrets.GH_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          TF_VAR_github_token: ${{ secrets.ORG_GH_TKN }}
+          GITHUB_TOKEN: ${{ secrets.ORG_GH_TKN }}
           
       - name: Terraform Apply
         run: |
           cd terraform
           terraform apply -auto-approve
         env:
-          TF_VAR_github_token: ${{ secrets.GH_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          TF_VAR_github_token: ${{ secrets.ORG_GH_TKN }}
+          GITHUB_TOKEN: ${{ secrets.ORG_GH_TKN }}
