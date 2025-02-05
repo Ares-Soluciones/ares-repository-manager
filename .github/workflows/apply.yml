@@ -7,8 +7,8 @@ on:
       - 'repos/**'
 
 env:
-  AWS_AK: ${{ secrets.AWS_AK }}
-  AWS_SAK: ${{ secrets.AWS_SAK }}
+  AWS_AK: XXXXXXXXXXXXXXXXX
+  AWS_SAK: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   GH_TKN: ${{ secrets.ORG_GH_TKN }}
 
 jobs:
