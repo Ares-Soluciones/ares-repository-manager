@@ -13,4 +13,3 @@ fp_02:
   visibility: public
   teams: [ ares-team ]
   topics: [ dotnet, backend ]
-

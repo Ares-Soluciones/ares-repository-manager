@@ -1,5 +1,6 @@
 # terraform/main.tf
 
+# Configuración del proveedor de Terraform
 terraform {
   required_providers {
     github = {
@@ -9,61 +10,67 @@ terraform {
   }
 }
 
-# Variables necesarias
+# Configuración del proveedor de GitHub
+provider "github" {
+  token = var.github_token
+  owner = "ares-soluciones"
+}
+
+# Definición de variables necesarias
 variable "github_token" {
   type        = string
   sensitive   = true
   description = "Token de GitHub con permisos para administrar repositorios"
 }
 
-provider "github" {
-  owner = "ares-soluciones"
-  token = var.github_token
-}
-
-# Variables y configuraciones predeterminadas
+# Definición de estructuras de datos locales
 locals {
-  # Lee todos los archivos YAML de proyectos
+  # Lectura de archivos YAML de proyectos
   project_files = fileset("${path.module}/../repos", "*.yml")
   
-  # Parsea cada archivo YAML de proyecto
+  # Parseo de archivos YAML en estructura de datos
   projects = {
     for file in local.project_files :
     trimsuffix(file, ".yml") => yamldecode(file("${path.module}/../repos/${file}"))
   }
 
-  # Aplanar la estructura de repositorios para facilitar su procesamiento
-  repositories = merge([
-    for project_name, project in local.projects : {
-      for repo_key, repo in project : repo_key => merge(repo, {
+  # Aplanamiento de la estructura de repositorios
+  repositories = {
+    for project_name, project in local.projects :
+    for repo_key, repo in project :
+    "${project_name}-${repo_key}" => merge(
+      repo,
+      {
         project_name = project_name
-      })
-    }
-  ]...)
+        full_name    = "${project_name}-${repo_key}"
+      }
+    )...
+  }
 
-  # Configuraciones predeterminadas para todos los repositorios
+  # Configuraciones predeterminadas para protección de ramas
   default_branch_protection = {
     develop = {
       required_approving_review_count = 1
-      enforce_admins                  = false
-      allow_force_pushes              = false
-      require_status_checks           = true
+      enforce_admins                 = false
+      allows_force_pushes           = false
+      requires_status_checks        = true
     }
     testing = {
       required_approving_review_count = 2
-      enforce_admins                  = false
-      allow_force_pushes              = false
-      require_status_checks           = true
+      enforce_admins                 = false
+      allows_force_pushes           = false
+      requires_status_checks        = true
     }
     master = {
       required_approving_review_count = 2
-      enforce_admins                  = true
-      allow_force_pushes              = false
-      require_status_checks           = true
-      required_linear_history         = true
+      enforce_admins                 = true
+      allows_force_pushes           = false
+      requires_status_checks        = true
+      required_linear_history       = true
     }
   }
 
+  # Configuraciones predeterminadas para environments
   default_environments = {
     dev = {
       deployment_branch_policy = {
@@ -85,14 +92,15 @@ locals {
     }
   }
 
+  # Configuraciones predeterminadas para repositorios
   default_settings = {
-    has_issues             = true
-    has_projects           = true
-    has_wiki               = true
+    has_issues            = true
+    has_projects          = true
+    has_wiki              = true
     delete_branch_on_merge = true
-    allow_squash_merge     = true
-    allow_merge_commit     = false
-    allow_rebase_merge     = true
+    allow_squash_merge    = true
+    allow_merge_commit    = false
+    allow_rebase_merge    = true
   }
 }
 
@@ -106,7 +114,7 @@ resource "github_repository" "repos" {
   topics      = each.value.topics
   auto_init   = true
 
-  # Aplicar configuraciones predeterminadas
+  # Aplicación de configuraciones predeterminadas
   has_issues            = local.default_settings.has_issues
   has_projects          = local.default_settings.has_projects
   has_wiki              = local.default_settings.has_wiki
@@ -116,11 +124,30 @@ resource "github_repository" "repos" {
   allow_rebase_merge    = local.default_settings.allow_rebase_merge
 }
 
+# Asignación de equipos a repositorios
+resource "github_team_repository" "team_access" {
+  for_each = {
+    for pair in flatten([
+      for repo_key, repo in local.repositories : [
+        for team in repo.teams : {
+          repo_name = repo.name
+          team     = team
+          key      = "${repo.name}-${team}"
+        }
+      ]
+    ]) : pair.key => pair
+  }
+
+  team_id    = each.value.team
+  repository = github_repository.repos[each.value.repo_name].name
+  permission = "push"
+}
+
 # Creación de ramas
 resource "github_branch" "branches" {
   for_each = {
     for pair in flatten([
-      for repo_id, repo in local.repositories : [
+      for repo_key, repo in local.repositories : [
         for branch_name in ["develop", "testing", "master"] : {
           repo_name = repo.name
           branch    = branch_name
@@ -137,25 +164,7 @@ resource "github_branch" "branches" {
   depends_on = [github_repository.repos]
 }
 
-# Asignación de equipos
-resource "github_team_repository" "team_access" {
-  for_each = {
-    for access in flatten([
-      for repo_key, repo in local.repositories : [
-        for team in repo.teams : {
-          repo_key = repo_key
-          team     = team
-        }
-      ]
-    ]) : "${access.repo_key}-${access.team}" => access
-  }
-
-  team_id    = each.value.team
-  repository = github_repository.repos[each.value.repo_key].name
-  permission = "push"  # Puedes ajustar el nivel de permiso según necesites
-}
-
-# Protección de ramas
+# Configuración de protección de ramas
 resource "github_branch_protection" "protection" {
   for_each = {
     for pair in flatten([
@@ -178,8 +187,9 @@ resource "github_branch_protection" "protection" {
   }
 
   enforce_admins         = each.value.config.enforce_admins
-  allows_force_pushes    = each.value.config.allow_force_pushes
-  require_linear_history = lookup(each.value.config, "required_linear_history", false)
+  allows_force_pushes    = each.value.config.allows_force_pushes
+  required_linear_history = lookup(each.value.config, "required_linear_history", false)
+  requires_status_checks = each.value.config.requires_status_checks
 
   depends_on = [github_branch.branches]
 }
@@ -210,13 +220,14 @@ resource "github_repository_environment" "environments" {
   depends_on = [github_repository.repos]
 }
 
+# Output para depuración
 output "debug_repositories" {
   value = {
     for key, repo in local.repositories :
     key => {
-      name = repo.name
-      project = repo.project_name
-      repo_key = repo.repo_key
+      name         = repo.name
+      project_name = repo.project_name
+      full_name    = repo.full_name
     }
   }
 }
