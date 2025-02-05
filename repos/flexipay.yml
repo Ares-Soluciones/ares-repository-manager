@@ -2,7 +2,7 @@ repos:
   - name: api-pse-avanza
     description: Repositorio para el API de PSE de Avanza
     team: team-ares
-    visibility: private
+    visibility: public
     topics:
       - dotnet
       - backend
