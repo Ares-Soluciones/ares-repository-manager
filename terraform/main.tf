@@ -188,7 +188,7 @@ resource "github_branch_protection" "protection" {
   enforce_admins         = each.value.config.enforce_admins
   allows_force_pushes    = each.value.config.allows_force_pushes
   required_linear_history = lookup(each.value.config, "required_linear_history", false)
-  requires_status_checks = each.value.config.requires_status_checks
+  # requires_status_checks = each.value.config.requires_status_checks
 
   depends_on = [github_branch.branches]
 }
