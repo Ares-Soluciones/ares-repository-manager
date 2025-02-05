@@ -106,22 +106,35 @@ resource "github_repository" "repos" {
   topics      = each.value.topics
   auto_init   = true
 
-  dynamic "template" {
-    for_each = lookup(each.value, "template", null) != null ? [each.value.template] : []
-    content {
-      owner      = template.value.owner
-      repository = template.value.repository
-    }
+  # Aplicar configuraciones predeterminadas
+  has_issues            = local.default_settings.has_issues
+  has_projects          = local.default_settings.has_projects
+  has_wiki              = local.default_settings.has_wiki
+  delete_branch_on_merge = local.default_settings.delete_branch_on_merge
+  allow_squash_merge    = local.default_settings.allow_squash_merge
+  allow_merge_commit    = local.default_settings.allow_merge_commit
+  allow_rebase_merge    = local.default_settings.allow_rebase_merge
+}
+
+# Creación de ramas
+resource "github_branch" "branches" {
+  for_each = {
+    for pair in flatten([
+      for repo_id, repo in local.repositories : [
+        for branch_name in ["develop", "testing", "master"] : {
+          repo_name = repo.name
+          branch    = branch_name
+          key       = "${repo.name}-${branch_name}"
+        }
+      ]
+    ]) : pair.key => pair
   }
 
-  # Aplicar configuraciones predeterminadas
-  has_issues             = local.default_settings.has_issues
-  has_projects           = local.default_settings.has_projects
-  has_wiki               = local.default_settings.has_wiki
-  delete_branch_on_merge = local.default_settings.delete_branch_on_merge
-  allow_squash_merge     = local.default_settings.allow_squash_merge
-  allow_merge_commit     = local.default_settings.allow_merge_commit
-  allow_rebase_merge     = local.default_settings.allow_rebase_merge
+  repository    = each.value.repo_name
+  branch        = each.value.branch
+  source_branch = "master"
+
+  depends_on = [github_repository.repos]
 }
 
 # Asignación de equipos
@@ -140,27 +153,6 @@ resource "github_team_repository" "team_access" {
   team_id    = each.value.team
   repository = github_repository.repos[each.value.repo_key].name
   permission = "push"  # Puedes ajustar el nivel de permiso según necesites
-}
-
-# Creación de ramas
-resource "github_branch" "branches" {
-  for_each = {
-    for pair in flatten([
-      for repo_key, repo in local.repositories : [
-        for branch_name in ["develop", "testing", "master"] : {
-          repo_name = repo.name
-          branch    = branch_name
-          key       = "${repo.name}-${branch_name}"
-        }
-      ]
-    ]) : pair.key => pair
-  }
-
-  repository    = each.value.repo_name
-  branch        = each.value.branch
-  source_branch = "master"
-
-  depends_on = [github_repository.repos]
 }
 
 # Protección de ramas
@@ -216,4 +208,15 @@ resource "github_repository_environment" "environments" {
   }
 
   depends_on = [github_repository.repos]
+}
+
+output "debug_repositories" {
+  value = {
+    for key, repo in local.repositories :
+    key => {
+      name = repo.name
+      project = repo.project_name
+      repo_key = repo.repo_key
+    }
+  }
 }
