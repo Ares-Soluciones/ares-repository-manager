@@ -1,14 +1,15 @@
 # repos/project_1.yml
+
 fp_01:
-  name: nombre-repo_01
-  description: "Descripción del repositorio"
+  name: fp-api-pse-avanza
+  description: "Descripción del repositorio api-pse-avanza"
   visibility: public
-  teams: [ team-01, team-02 ]
+  teams: [ ares-team ]
   topics: [ dotnet, backend ]
 
 fp_02:
-  name: nombre-repo_02
+  name: fp-api-trm
   description: "Descripción del repositorio"
   visibility: public
-  teams: [ team-01, team-02 ]
+  teams: [ ares-team ]
   topics: [ dotnet, backend ]

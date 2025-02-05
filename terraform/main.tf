@@ -39,7 +39,7 @@ locals {
         project_name = project_name
       })
     }
-  ]...)
+  ])
 
   # Configuraciones predeterminadas para todos los repositorios
   default_branch_protection = {
@@ -145,66 +145,75 @@ resource "github_team_repository" "team_access" {
 # Creación de ramas
 resource "github_branch" "branches" {
   for_each = {
-    for branch in flatten([
+    for pair in flatten([
       for repo_key, repo in local.repositories : [
         for branch_name in ["develop", "testing", "master"] : {
-          repo_key = repo_key
-          branch   = branch_name
+          repo_name = repo.name
+          branch    = branch_name
+          key       = "${repo.name}-${branch_name}"
         }
       ]
-    ]) : "${repo_key}-${branch.branch}" => branch
+    ]) : pair.key => pair
   }
 
-  repository = github_repository.repos[each.value.repo_key].name
-  branch     = each.value.branch
+  repository    = each.value.repo_name
+  branch        = each.value.branch
   source_branch = "master"
+
+  depends_on = [github_repository.repos]
 }
 
 # Protección de ramas
 resource "github_branch_protection" "protection" {
   for_each = {
-    for protection in flatten([
+    for pair in flatten([
       for repo_key, repo in local.repositories : [
         for branch_name, protection in local.default_branch_protection : {
-          repo_key = repo_key
-          branch   = branch_name
-          config   = protection
+          repo_name = repo.name
+          branch    = branch_name
+          config    = protection
+          key       = "${repo.name}-${branch_name}"
         }
       ]
-    ]) : "${protection.repo_key}-${protection.branch}" => protection
+    ]) : pair.key => pair
   }
 
-  repository_id = github_repository.repos[each.value.repo_key].node_id
+  repository_id = github_repository.repos[each.value.repo_name].node_id
   pattern       = each.value.branch
 
   required_pull_request_reviews {
     required_approving_review_count = each.value.config.required_approving_review_count
   }
 
-  enforce_admins = each.value.config.enforce_admins
-  allows_force_pushes = each.value.config.allow_force_pushes
-  # require_linear_history = lookup(each.value.config, "required_linear_history", false)
+  enforce_admins         = each.value.config.enforce_admins
+  allows_force_pushes    = each.value.config.allow_force_pushes
+  require_linear_history = lookup(each.value.config, "required_linear_history", false)
+
+  depends_on = [github_branch.branches]
 }
 
 # Creación de environments
 resource "github_repository_environment" "environments" {
   for_each = {
-    for env in flatten([
+    for pair in flatten([
       for repo_key, repo in local.repositories : [
         for env_name, env_config in local.default_environments : {
-          repo_key = repo_key
-          env_name = env_name
-          config   = env_config
+          repo_name = repo.name
+          env_name  = env_name
+          config    = env_config
+          key       = "${repo.name}-${env_name}"
         }
       ]
-    ]) : "${env.repo_key}-${env.env_name}" => env
+    ]) : pair.key => pair
   }
 
-  repository  = github_repository.repos[each.value.repo_key].name
+  repository  = each.value.repo_name
   environment = each.value.env_name
 
   deployment_branch_policy {
     protected_branches     = each.value.config.deployment_branch_policy.protected_branches
     custom_branch_policies = each.value.config.deployment_branch_policy.custom_branch_policies
   }
+
+  depends_on = [github_repository.repos]
 }
