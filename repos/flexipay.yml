@@ -40,25 +40,25 @@ environments:
     deployment_branch_policy:
       protected_branches: false           # Permite despliegues desde cualquier rama
       custom_branch_policies: true
-    secrets:
-      AWS_ACCESS_KEY: "AKIAXXXXXXXXXXXXXX"
-      AWS_SECRET_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    # secrets:
+    #   AWS_ACCESS_KEY: "AKIAXXXXXXXXXXXXXX"
+    #   AWS_SECRET_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
       
   test:
     deployment_branch_policy:
       protected_branches: true            # Solo permite despliegues desde ramas protegidas
       custom_branch_policies: false
-    secrets:
-      AWS_ACCESS_KEY: "AKIAXXXXXXXXXXXXXX"
-      AWS_SECRET_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    # secrets:
+    #   AWS_ACCESS_KEY: "AKIAXXXXXXXXXXXXXX"
+    #   AWS_SECRET_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
       
   prod:
     deployment_branch_policy:
       protected_branches: true
       custom_branch_policies: false
-    secrets:
-      AWS_ACCESS_KEY: "AKIAXXXXXXXXXXXXXX"
-      AWS_SECRET_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    # secrets:
+    #   AWS_ACCESS_KEY: "AKIAXXXXXXXXXXXXXX"
+    #   AWS_SECRET_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
 # Configuración adicional del repositorio
 settings:
