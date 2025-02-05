@@ -39,6 +39,7 @@ jobs:
           cd terraform
           terraform init
         env:
+          TF_VAR_github_token: ${{ secrets.GH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           
       - name: Terraform Plan
@@ -46,6 +47,7 @@ jobs:
           cd terraform
           terraform plan
         env:
+          TF_VAR_github_token: ${{ secrets.GH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   apply:
@@ -63,6 +65,7 @@ jobs:
           cd terraform
           terraform init
         env:
+          TF_VAR_github_token: ${{ secrets.GH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           
       - name: Terraform Apply
@@ -70,4 +73,5 @@ jobs:
           cd terraform
           terraform apply -auto-approve
         env:
+          TF_VAR_github_token: ${{ secrets.GH_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
