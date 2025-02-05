@@ -6,17 +6,12 @@ Repository to versioning al repository creation over de organization.
 control-repo/
 ├── .github/
 │   └── workflows/
-│       └── apply.yml            # Workflow principal
+│       └── apply.yml           # Workflow principal
 ├── repos/
-│   └── mi-nuevo-repo/          # Directorio con nombre del repo
-│       └── config.yml          # Config específica (opcional)
+│   └── project_1.yml           # Yml del proyecto 1 (dentro los repos asociados a ese proyecto)
+│   └── project_2.yml           # Yml del proyecto 2 (dentro los repos asociados a ese proyecto)
 ├── terraform/
-│   ├── main.tf                 # Configuración central
-│   ├── branch_creator.tf       # Módulo para crear ramas
-│   └── environment_secrets.tf  # Módulo para secrets
-└── scripts/
-    ├── setup-branches.sh       # Crea ramas vía API
-    └── set-secrets.sh          # Configura secrets en environments
+│   └── main.tf                 # Configuración central
 
 ```
 
