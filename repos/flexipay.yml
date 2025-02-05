@@ -1,0 +1,28 @@
+repos:
+  - name: api-pse-avanza
+    description: Repositorio para el API de PSE de Avanza
+    team: team-ares
+    visibility: private
+    topics:
+      - dotnet
+      - backend
+    branch_protection:
+      develop:
+        required_approving_review_count: 1
+      testing:
+        required_approving_review_count: 2
+      master:
+        required_approving_review_count: 2
+    environments:
+      dev:
+        secrets:
+          AWS_AK: "AKIAXXXXXXXXXXXXXX"
+          AWS_SAK: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      test:
+        secrets:
+          AWS_AK: "AKIAXXXXXXXXXXXXXX"
+          AWS_SAK: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      prod:
+        secrets:
+          AWS_AK: "AKIAYYYYYYYYYYYYYY"
+          AWS_SAK: "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
