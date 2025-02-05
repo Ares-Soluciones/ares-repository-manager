@@ -69,3 +69,4 @@ settings:
   allow_squash_merge: true    # Permite squash merging
   allow_merge_commit: false   # No permite merge commits regulares
   allow_rebase_merge: true    # Permite rebase merging
+

@@ -110,24 +110,24 @@ resource "github_repository_environment" "environment" {
 }
 
 # Configuración de secrets para cada environment
-resource "github_actions_environment_secret" "env_secrets" {
-  for_each = {
-    for secret in flatten([
-      for repo_name, repo in local.repo_configs : [
-        for env_name, env in repo.environments : [
-          for secret_name, secret_value in env.secrets : {
-            repo = repo_name
-            env  = env_name
-            name = secret_name
-            value = secret_value
-          }
-        ]
-      ]
-    ]) : "${secret.repo}-${secret.env}-${secret.name}" => secret
-  }
+# resource "github_actions_environment_secret" "env_secrets" {
+#   for_each = {
+#     for secret in flatten([
+#       for repo_name, repo in local.repo_configs : [
+#         for env_name, env in repo.environments : [
+#           for secret_name, secret_value in env.secrets : {
+#             repo = repo_name
+#             env  = env_name
+#             name = secret_name
+#             value = secret_value
+#           }
+#         ]
+#       ]
+#     ]) : "${secret.repo}-${secret.env}-${secret.name}" => secret
+#   }
 
-  repository       = github_repository.repos[each.value.repo].name
-  environment      = each.value.env
-  secret_name     = each.value.name
-  plaintext_value = each.value.value
-}
+#   repository       = github_repository.repos[each.value.repo].name
+#   environment      = each.value.env
+#   secret_name     = each.value.name
+#   plaintext_value = each.value.value
+# }
