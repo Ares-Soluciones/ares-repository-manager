@@ -1,5 +1,3 @@
-# terraform/main.tf
-
 # Configuración del proveedor de Terraform
 terraform {
   required_providers {
@@ -35,17 +33,18 @@ locals {
   }
 
   # Aplanamiento de la estructura de repositorios
-  repositories = {
-    for project_name, project in local.projects :
-    for repo_key, repo in project :
-    "${project_name}-${repo_key}" => merge(
-      repo,
-      {
-        project_name = project_name
-        full_name    = "${project_name}-${repo_key}"
-      }
-    )...
-  }
+  repositories = merge([
+    for project_name, project in local.projects : {
+      for repo_key, repo in project :
+      "${project_name}-${repo_key}" => merge(
+        repo,
+        {
+          project_name = project_name
+          full_name    = "${project_name}-${repo_key}"
+        }
+      )
+    }
+  ]...)
 
   # Configuraciones predeterminadas para protección de ramas
   default_branch_protection = {
