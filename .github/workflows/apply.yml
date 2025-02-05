@@ -28,6 +28,12 @@ jobs:
     #       aws-secret-access-key: ${ env.AWS_SAK }
     #       aws-region: us-east-1
 
+      - name: Configure GitHub Token
+        env:
+          TF_VAR_github_token: ${{ env.GH_TKN }}
+
+        run: echo "GitHub token configured"
+        
       - name: Terraform Apply
         run: |
           cd terraform
