@@ -17,36 +17,42 @@ variable "github_token" {
   sensitive = true
 }
 
-# Crear repositorio con 'master' como default branch
 resource "github_repository" "repo" {
-  for_each      = { for dir in fileset("${path.module}/../repos", "*") : dir => dir }
-  name          = each.key
-  description   = "Repositorio creado automáticamente"
-  private       = true
-  auto_init     = true
-  default_branch= "master"
+  for_each    = { for dir in fileset("${path.module}/../repos", "*") : dir => dir }
+  name        = each.key
+  description = "Repositorio creado automáticamente"
+  visibility  = "private"
+  auto_init   = true
 }
 
-# Protección de ramas (develop, testing, master)
-resource "github_branch_protection" "main" {
-  for_each      = github_repository.repo
-  repository_id = each.value.name
+resource "github_branch_default" "default" {
+  for_each   = github_repository.repo
+  repository = each.value.name
+  branch     = "master"
+}
 
-  dynamic "pattern" {
-    for_each = ["develop", "testing", "master"]
-    content {
-      name             = pattern.value
-      enforce_admins   = false
-      required_reviews {
-        required_approving_review_count = 2
-      }
-    }
+resource "github_branch_protection" "protection" {
+  for_each = { for pair in setproduct(keys(github_repository.repo), ["develop", "testing", "master"]) : "${pair[0]}-${pair[1]}" => {
+    repo = pair[0]
+    branch = pair[1]
+  }}
+  
+  repository_id                   = each.value.repo
+  pattern                        = each.value.branch
+  enforce_admins                 = false
+  required_pull_request_reviews {
+    required_approving_review_count = 2
   }
 }
 
-# Crear environments
 resource "github_repository_environment" "envs" {
-  for_each    = toset(["dev", "test", "prod"])
-  repository  = github_repository.repo[each.key].name
-  environment = each.value
+  for_each = {
+    for pair in setproduct(keys(github_repository.repo), ["dev", "test", "prod"]) : "${pair[0]}-${pair[1]}" => {
+      repo = pair[0]
+      env  = pair[1]
+    }
+  }
+  
+  repository  = each.value.repo
+  environment = each.value.env
 }
