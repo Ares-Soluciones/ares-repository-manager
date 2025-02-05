@@ -123,22 +123,22 @@ resource "github_repository" "repos" {
   allow_rebase_merge    = local.default_settings.allow_rebase_merge
 }
 
-# Asignación de equipos a repositorios
+# Asignación de equipos a repositorios (VERSIÓN CORREGIDA)
 resource "github_team_repository" "team_access" {
   for_each = {
     for pair in flatten([
       for repo_key, repo in local.repositories : [
         for team in repo.teams : {
-          repo_name = repo.name
-          team     = team
-          key      = "${repo.name}-${team}"
+          repo_key  = repo_key
+          team      = team
+          unique_id = "${repo_key}-${team}"
         }
       ]
-    ]) : pair.key => pair
+    ]) : pair.unique_id => pair
   }
 
   team_id    = each.value.team
-  repository = github_repository.repos[each.value.repo_name].name
+  repository = github_repository.repos[each.value.repo_key].name
   permission = "push"
 }
 
