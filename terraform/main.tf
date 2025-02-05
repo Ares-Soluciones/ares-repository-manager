@@ -16,8 +16,8 @@ provider "github" {
 
 # Variables necesarias
 variable "github_token" {
-  type      = string
-  sensitive = true
+  type        = string
+  sensitive   = true
   description = "Token de GitHub con permisos para administrar repositorios"
 }
 
@@ -29,7 +29,7 @@ locals {
   # Parsea cada archivo YAML y crea un mapa de configuraciones
   repo_configs = {
     for file in local.repo_files :
-    basename(file, ".yml") => yamldecode(file("${path.module}/../repos/${file}"))
+    trimsuffix(file, ".yml") => yamldecode(file("${path.module}/../repos/${file}"))
   }
 }
 

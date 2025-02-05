@@ -1,29 +1,71 @@
-repos:
-  - name: api-pse-avanza
-    description: Repositorio para el API de PSE de Avanza
-    team: team-ares
-    visibility: public
-    topics:
-      - dotnet
-      - backend
-    branch_protection:
-      develop:
-        required_approving_review_count: 1
-      testing:
-        required_approving_review_count: 2
-      master:
-        required_approving_review_count: 2
-    environments:
-      dev:
-        secrets:
-          AWS_AK: "AKIAXXXXXXXXXXXXXX"
-          AWS_SAK: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-      test:
-        secrets:
-          AWS_AK: "AKIAXXXXXXXXXXXXXX"
-          AWS_SAK: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-      prod:
-        secrets:
-          AWS_AK: "AKIAXXXXXXXXXXXXXX"
-          AWS_SAK: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-          
+# repos/api-pagos.yml
+
+# Configuración básica del repositorio
+name: api-pse-avanza
+description: "API PSE AVANZA"
+team: team-ares
+visibility: public  # puede ser private o public
+
+# Etiquetas para categorizar el repositorio
+topics:
+  - dotnet
+  - backend
+
+# Configuración de protección para cada rama principal
+# Aquí defines las reglas de protección específicas por rama
+branch_protection:
+  develop:
+    required_approving_review_count: 1    # Desarrollo requiere 1 aprobación
+    enforce_admins: false                 # Los admins no están exentos de las reglas
+    allow_force_pushes: false            # No se permiten force pushes
+    require_status_checks: true          # Requiere que los checks pasen
+    
+  testing:
+    required_approving_review_count: 2    # Testing requiere 2 aprobaciones
+    enforce_admins: false
+    allow_force_pushes: false
+    require_status_checks: true
+    
+  master:
+    required_approving_review_count: 2    # Producción requiere 2 aprobaciones
+    enforce_admins: true                  # Incluso los admins deben seguir las reglas
+    allow_force_pushes: false
+    require_status_checks: true
+    required_linear_history: true         # Requiere historia lineal (no merges directos)
+
+# Configuración de environments y sus secretos
+# Cada environment puede tener sus propias variables y secretos
+environments:
+  dev:
+    deployment_branch_policy:
+      protected_branches: false           # Permite despliegues desde cualquier rama
+      custom_branch_policies: true
+    secrets:
+      AWS_ACCESS_KEY: "AKIAXXXXXXXXXXXXXX"
+      AWS_SECRET_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      
+  test:
+    deployment_branch_policy:
+      protected_branches: true            # Solo permite despliegues desde ramas protegidas
+      custom_branch_policies: false
+    secrets:
+      AWS_ACCESS_KEY: "AKIAXXXXXXXXXXXXXX"
+      AWS_SECRET_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+      
+  prod:
+    deployment_branch_policy:
+      protected_branches: true
+      custom_branch_policies: false
+    secrets:
+      AWS_ACCESS_KEY: "AKIAXXXXXXXXXXXXXX"
+      AWS_SECRET_KEY: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+# Configuración adicional del repositorio
+settings:
+  has_issues: true              # Habilita la sección de Issues
+  has_projects: true           # Habilita la sección de Projects
+  has_wiki: true              # Habilita la Wiki
+  delete_branch_on_merge: true # Elimina ramas automáticamente después del merge
+  allow_squash_merge: true    # Permite squash merging
+  allow_merge_commit: false   # No permite merge commits regulares
+  allow_rebase_merge: true    # Permite rebase merging
